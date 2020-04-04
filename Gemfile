@@ -9,7 +9,7 @@ gem 'devise', '~> 4.1.1'
 gem 'devise-i18n'
 
 gem 'uglifier', '>= 1.3.0'
-
+gem 'therubyracer'
 gem 'font-awesome-rails'
 gem 'jquery-rails'
 gem 'russian'
