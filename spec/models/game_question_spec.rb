@@ -24,6 +24,12 @@ RSpec.describe GameQuestion, type: :model do
       # именно под буквой b в тесте мы спрятали указатель на верный ответ
       expect(game_question.answer_correct?('b')).to be_truthy
     end
+
+    # тест на наличие методов делегатов level и text
+    it 'correct .text and .level delegates' do
+      expect(game_question.text).to eq(game_question.question.text)
+      expect(game_question.level).to eq(game_question.question.level)
+    end
   end
 
   # help_hash у нас имеет такой формат:
