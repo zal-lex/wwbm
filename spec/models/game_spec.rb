@@ -106,4 +106,17 @@ RSpec.describe Game, type: :model do
       expect(game_w_questions.status).to eq(:money)
     end
   end
+
+  context '.previous_level' do
+    it 'return `-1` at start of the game' do
+      expect(game_w_questions.previous_level).to eq(-1)
+    end
+
+    it 'return `0` when player made correct answer at first question' do
+      q = game_w_questions.current_game_question
+      game_w_questions.answer_current_question!(q.correct_answer_key)
+
+      expect(game_w_questions.previous_level).to eq(0)
+    end
+  end
 end
