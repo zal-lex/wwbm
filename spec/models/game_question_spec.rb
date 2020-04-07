@@ -52,4 +52,10 @@ RSpec.describe GameQuestion, type: :model do
       expect(ah.keys).to contain_exactly('a', 'b', 'c', 'd')
     end
   end
+
+  context '#correct_answer_key' do
+    it 'return `b` key' do
+      expect(game_question.correct_answer_key).to eq 'b'
+    end
+  end
 end
