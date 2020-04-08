@@ -105,6 +105,7 @@ RSpec.describe Game, type: :model do
     end
   end
 
+  # группа тестов на проверку метода, возвращающего предыдущий уровень
   context '.previous_level' do
     it 'return `-1` at start of the game' do
       expect(game_w_questions.previous_level).to eq(-1)
@@ -118,10 +119,121 @@ RSpec.describe Game, type: :model do
     end
   end
 
+  # тест на проверку текущего игрового вопроса
   context '.current_game_question' do
     it 'return exactily current question (0 level)' do
       question = game_w_questions.game_questions.detect { |q| q.question.level == 0 }
       expect(game_w_questions.current_game_question).to eq(question)
+    end
+  end
+
+  # группа тестов на проверку метода ответа на вопрос
+  describe '.answer_current_question!(letter)' do
+    let(:q) { game_w_questions.current_game_question }
+    let(:correct_answer_key) { q.correct_answer_key }
+    let(:incorrect_answer_key) { (%w[a b c d] - [correct_answer_key]).pop }
+    subject(:correct_answered) { game_w_questions.answer_current_question!(correct_answer_key) }
+    subject(:incorrect_answered) { game_w_questions.answer_current_question!(incorrect_answer_key) }
+
+    # когда дан верный ответ и до истечения времени
+    context 'correct answer in TIME_LIMIT' do
+      it 'return true' do
+        expect(correct_answered).to be true
+      end
+
+      it 'raise up current level' do
+        level = game_w_questions.current_level
+        game_w_questions.answer_current_question!(correct_answer_key)
+        expect(game_w_questions.current_level).to eq(level + 1)
+      end
+
+      it 'rewrite updated_at' do
+        updated_timestamp = game_w_questions.updated_at
+        game_w_questions.answer_current_question!(correct_answer_key)
+        expect(game_w_questions.updated_at).to be
+      end
+
+      # когда дан ответ на последний вопрос
+      context 'when it was the last question' do
+        before(:example) do
+          game_w_questions.current_level = 14
+          game_w_questions.answer_current_question!(correct_answer_key)
+        end
+
+        it 'change game status to :won' do
+          expect(game_w_questions.status).to eq(:won)
+        end
+
+        it 'set up prize to 1_000_000' do
+          expect(game_w_questions.prize).to eq(1000000)
+        end
+
+        it 'game was finished' do
+          game_w_questions.answer_current_question!(correct_answer_key)
+          expect(game_w_questions.finished?).to be true
+        end
+      end
+    end
+
+    # когда дан верный ответ на 6й вопрос после завершения лимита времини
+    context 'correct answer at 6th question when TIME_LIMIT is over' do
+      before(:example) do
+        game_w_questions.current_level = 5
+        game_w_questions.created_at = 1.hour.ago
+      end
+
+      it 'return false' do
+        expect(correct_answered).to be false
+      end
+
+      it 'change game status to :timeout' do
+        game_w_questions.answer_current_question!(correct_answer_key)
+        expect(game_w_questions.status).to eq(:timeout)
+      end
+
+      it 'set up prize to 1000' do
+        game_w_questions.answer_current_question!(correct_answer_key)
+        expect(game_w_questions.prize).to eq(1000)
+      end
+
+      it 'game was finished' do
+        game_w_questions.answer_current_question!(correct_answer_key)
+        expect(game_w_questions.finished?).to be true
+      end
+    end
+
+    # когда дан не верный ответ на 6й вопрос
+    context 'wrong answer' do
+      before(:example) do
+        game_w_questions.current_level = 5
+      end
+
+      it 'return false' do
+        expect(incorrect_answered).to be false
+      end
+
+      it 'change game status to :fail' do
+        game_w_questions.answer_current_question!(incorrect_answer_key)
+        expect(game_w_questions.status).to eq(:fail)
+      end
+
+      it 'set up prize to 1000' do
+        game_w_questions.answer_current_question!(incorrect_answer_key)
+        expect(game_w_questions.prize).to eq(1000)
+      end
+
+      it 'game was finished' do
+        game_w_questions.answer_current_question!(incorrect_answer_key)
+        expect(game_w_questions.finished?).to be true
+      end
+    end
+
+    # игра была завершена ранее
+    context 'game was finished earler' do
+      it 'return false' do
+        game_w_questions.finished_at = 1.hour.ago
+        expect(incorrect_answered).to be false
+      end
     end
   end
 end
