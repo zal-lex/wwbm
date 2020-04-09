@@ -32,6 +32,25 @@ RSpec.describe GameQuestion, type: :model do
     end
   end
 
+  # проверяем корректно ли отрабатывает serialize
+  it 'correct .help_hash' do
+    # на фабрике у нас изначально хэш пустой
+    expect(game_question.help_hash).to eq({})
+
+    # добавляем пару ключей
+    game_question.help_hash[:some_key1] = 'blabla1'
+    game_question.help_hash['some_key2'] = 'blabla2'
+
+    # сохраняем модель и ожидаем сохранения хорошего
+    expect(game_question.save).to be_truthy
+
+    # загрузим этот же вопрос из базы для чистоты эксперимента
+    gq = GameQuestion.find(game_question.id)
+
+    # проверяем новые значение хэша
+    expect(gq.help_hash).to eq({some_key1: 'blabla1', 'some_key2' => 'blabla2'})
+  end
+
   # help_hash у нас имеет такой формат:
   # {
   #   fifty_fifty: ['a', 'b'], # При использовании подсказски остались варианты a и b
@@ -41,6 +60,7 @@ RSpec.describe GameQuestion, type: :model do
   #
 
   context 'user helpers' do
+    # проверка работы подсказки "помощь зала"
     it 'correct audience_help' do
       expect(game_question.help_hash).not_to include(:audience_help)
 
@@ -50,6 +70,30 @@ RSpec.describe GameQuestion, type: :model do
 
       ah = game_question.help_hash[:audience_help]
       expect(ah.keys).to contain_exactly('a', 'b', 'c', 'd')
+    end
+
+    # проверка работы подсказки 50/50
+    it 'correct fifty_fifty_help' do
+      expect(game_question.help_hash).not_to include(:audience_help)
+      game_question.add_fifty_fifty
+
+      expect(game_question.help_hash).to include(:fifty_fifty)
+      ff = game_question.help_hash[:fifty_fifty]
+
+      expect(ff.size).to eq 2
+      expect(ff).to include('b')
+    end
+
+    # проверка работы подсказки "звонок другу"
+    it 'correct friend_call_help' do
+      expect(game_question.help_hash).not_to include(:friend_call)
+      game_question.add_friend_call
+
+      expect(game_question.help_hash).to include(:friend_call)
+      fc = game_question.help_hash[:friend_call]
+
+      expect(fc).to be_a(String)
+      expect(fc).to include('считает, что это вариант')
     end
   end
 
