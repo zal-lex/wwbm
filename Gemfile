@@ -11,6 +11,7 @@ gem 'font-awesome-rails'
 gem 'jquery-rails'
 gem 'russian'
 gem 'twitter-bootstrap-rails'
+gem 'therubyracer'
 
 group :development, :test do
   gem 'byebug'
