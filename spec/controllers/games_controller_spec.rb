@@ -153,5 +153,19 @@ RSpec.describe GamesController, type: :controller do
       expect(response).to redirect_to(game_path(game))
       expect(flash.empty?).to be_truthy # удачный ответ не заполняет flash
     end
+
+    # юзер отвечает на вопрос не правильно - игра завершается
+    it 'answer incorrect' do
+      # передаем параметр params[:letter]
+
+      incorrect_answer_key = (%w[a b c d] - [game_w_questions.current_game_question.correct_answer_key]).sample
+      put :answer, id: game_w_questions.id, letter: incorrect_answer_key
+      game = assigns(:game)
+
+      expect(game.finished?).to be true
+      expect(response).to redirect_to(user_path(user))
+      expect(game.status).to eq(:fail)
+      expect(flash[:alert]).to be # не удачный ответ заполняет flash
+    end
   end
 end
