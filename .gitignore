@@ -21,3 +21,5 @@
 .DS_Store
 
 .rubocop.yml
+.ruby-gemset
+.ruby-version
