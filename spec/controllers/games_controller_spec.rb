@@ -198,6 +198,7 @@ RSpec.describe GamesController, type: :controller do
       expect(game.current_game_question.help_hash[:fifty_fifty]).to be
       expect(game.current_game_question.help_hash[:fifty_fifty]).to include(game_w_questions.current_game_question.correct_answer_key)
       expect(response).to redirect_to(game_path(game))
-    end
+      expect(game.current_game_question.help_hash.size).to eq(1)
+    end 
   end
 end
