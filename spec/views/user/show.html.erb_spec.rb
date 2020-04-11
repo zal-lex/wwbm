@@ -13,24 +13,29 @@ RSpec.describe 'users/show', type: :view do
         FactoryBot.build_stubbed(:game, id: 15, created_at: Time.parse('2020.04.09, 13:00'), current_level: 10, prize: 1000),
         FactoryBot.build_stubbed(:game, id: 10, created_at: Time.parse('2020.04.03, 16:00'), current_level: 11, prize: 32000)
       ])
-      render
     end
 
     shared_examples 'user template' do
       # Проверяем, что шаблон выводит имя игрока
       it 'player name' do
-        expect(rendered).to match /James Bond/
+        render
+        expect(rendered).to have_content 'James Bond'
       end
 
       # Проверяем, что шаблон выводит паршиал
+      # it 'renders partial' do
+        # expect(rendered).to have_content 'User game goes here'
+      # end
       it 'renders player balances' do
+        render
         expect(rendered).to match /1 000.*32 000/m
       end
     end
 
     context 'Anonymous user' do
       it 'anonim have no link to change name or password' do
-        expect(rendered).not_to match /Сменить имя и пароль/
+        render
+        expect(rendered).not_to have_content 'Сменить имя и пароль'
       end
 
       it_behaves_like 'user template'
@@ -38,8 +43,11 @@ RSpec.describe 'users/show', type: :view do
 
     context 'Authorized user' do
       it 'authorized user have link to change name or password' do
+        user = FactoryBot.build_stubbed(:user, name: 'James Bond')
         sign_in user
-        expect(rendered).to match /Сменить имя и пароль/
+        assign(:user, user)
+        render
+        expect(rendered).to have_content 'Сменить имя и пароль'
       end
 
       it_behaves_like 'user template'
