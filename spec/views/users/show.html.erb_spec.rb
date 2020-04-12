@@ -9,10 +9,7 @@ RSpec.describe 'users/show', type: :view do
     before(:example) do
       user = assign(:user, FactoryBot.create(:user, name: 'James Bond'))
       stub_template 'users/_game.html.erb' => 'User game goes here'
-      # assign(:games, [
-      #   FactoryBot.build_stubbed(:game, id: 15, created_at: Time.parse('2020.04.09, 13:00'), current_level: 10, prize: 1000),
-      #   FactoryBot.build_stubbed(:game, id: 10, created_at: Time.parse('2020.04.03, 16:00'), current_level: 11, prize: 32000)
-      # ])
+      assign(:games, [double(:game)])
       render
     end
 
@@ -30,10 +27,6 @@ RSpec.describe 'users/show', type: :view do
     it 'renders partial' do
       expect(rendered).to have_content 'User game goes here'
     end
-
-    # it 'renders player balances' do
-    #   expect(rendered).to match /1 000.*32 000/m
-    # end
   end
 
   # Проверяем случай, когда пользователь залогинился
@@ -42,10 +35,7 @@ RSpec.describe 'users/show', type: :view do
     before(:example) do
       user = assign(:user, FactoryBot.create(:user, name: 'James Bond'))
       stub_template 'users/_game.html.erb' => 'User game goes here'
-      # assign(:games, [
-      #   FactoryBot.build_stubbed(:game, id: 15, created_at: Time.parse('2020.04.09, 13:00'), current_level: 10, prize: 1000),
-      #   FactoryBot.build_stubbed(:game, id: 10, created_at: Time.parse('2020.04.03, 16:00'), current_level: 11, prize: 32000)
-      # ])
+      assign(:games, [double(:game)])
       sign_in user
 
       render
@@ -65,9 +55,5 @@ RSpec.describe 'users/show', type: :view do
     it 'renders partial' do
       expect(rendered).to have_content 'User game goes here'
     end
-
-    # it 'renders player balances' do
-    #   expect(rendered).to match /1 000.*32 000/m
-    # end
   end
 end
